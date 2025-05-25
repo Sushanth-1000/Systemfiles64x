@@ -1,0 +1,1122 @@
+﻿// 1. Topological Sort
+#include <stdio.h>
+#define MAX 100
+
+
+int visited[MAX], stack[MAX], top = -1;
+
+
+void dfs(int graph[MAX][MAX], int v, int n) {
+    visited[v] = 1;
+    for (int i = 0; i < n; i++) {
+        if (graph[v][i] && !visited[i])
+            dfs(graph, i, n);
+    }
+    stack[++top] = v;
+}
+
+
+int main() {
+    int graph[MAX][MAX], n;
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+    printf("Enter adjacency matrix:\n");
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            scanf("%d", &graph[i][j]);
+
+
+    for (int i = 0; i < n; i++)
+        visited[i] = 0;
+
+
+    for (int i = 0; i < n; i++)
+        if (!visited[i])
+            dfs(graph, i, n);
+
+
+    printf("Topological Order: ");
+    while (top != -1)
+        printf("%d ", stack[top--]);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 2. Johnson Trotter Algorithm
+#include <stdio.h>
+#include <stdlib.h>
+
+
+#define LEFT -1
+#define RIGHT 1
+
+
+int getMobile(int *a, int *dir, int n) {
+    int mobile = 0, mobile_index = -1;
+    for (int i = 0; i < n; i++) {
+        int next = i + dir[a[i] - 1];
+        if (next >= 0 && next < n && a[i] > a[next] && a[i] > mobile) {
+            mobile = a[i];
+            mobile_index = i;
+        }
+    }
+    return mobile_index;
+}
+
+
+void printPerm(int *a, int n) {
+    for (int i = 0; i < n; i++)
+        printf("%d ", a[i]);
+    printf("\n");
+}
+
+
+void johnsonTrotter(int n) {
+    int a[n], dir[n];
+    for (int i = 0; i < n; i++) {
+        a[i] = i + 1;
+        dir[i] = LEFT;
+    }
+    printPerm(a, n);
+
+
+    while (1) {
+        int mobile_index = getMobile(a, dir, n);
+        if (mobile_index == -1)
+            break;
+
+
+        int next = mobile_index + dir[a[mobile_index] - 1];
+        int temp = a[mobile_index];
+        a[mobile_index] = a[next];
+        a[next] = temp;
+
+
+        int tdir = dir[a[mobile_index] - 1];
+        dir[a[mobile_index] - 1] = dir[a[next] - 1];
+        dir[a[next] - 1] = tdir;
+
+
+        for (int i = 0; i < n; i++) {
+            if (a[i] > a[next])
+                dir[a[i] - 1] = (dir[a[i] - 1] == LEFT) ? RIGHT : LEFT;
+        }
+        printPerm(a, n);
+    }
+}
+
+
+int main2() {
+    int n;
+    printf("Enter the number of elements: ");
+    scanf("%d", &n);
+    johnsonTrotter(n);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 3. Merge Sort with time computation
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+
+void merge(int arr[], int l, int m, int r) {
+    int i = l, j = m + 1, k = 0;
+    int *temp = (int *)malloc((r - l + 1) * sizeof(int));
+    while (i <= m && j <= r) {
+        if (arr[i] <= arr[j])
+            temp[k++] = arr[i++];
+        else
+            temp[k++] = arr[j++];
+    }
+    while (i <= m)
+        temp[k++] = arr[i++];
+    while (j <= r)
+        temp[k++] = arr[j++];
+    for (i = l, k = 0; i <= r; i++, k++)
+        arr[i] = temp[k];
+    free(temp);
+}
+
+
+void mergeSort(int arr[], int l, int r) {
+    if (l < r) {
+        int m = l + (r - l) / 2;
+        mergeSort(arr, l, m);
+        mergeSort(arr, m + 1, r);
+        merge(arr, l, m, r);
+    }
+}
+
+
+int main3() {
+    int n;
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+    int *arr = (int *)malloc(n * sizeof(int));
+    printf("Enter elements: ");
+    for (int i = 0; i < n; i++)
+        scanf("%d", &arr[i]);
+
+
+    clock_t start = clock();
+    mergeSort(arr, 0, n - 1);
+    clock_t end = clock();
+
+
+    printf("Sorted array: ");
+    for (int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+
+
+    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("\nTime taken: %f seconds\n", time_taken);
+    free(arr);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 4. Quick Sort with time computation
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+
+int partition(int arr[], int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (arr[j] < pivot) {
+            i++;
+            int temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+    }
+    int temp = arr[i + 1];
+    arr[i + 1] = arr[high];
+    arr[high] = temp;
+    return i + 1;
+}
+
+
+void quickSort(int arr[], int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+
+int main4() {
+    int n;
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+    int *arr = (int *)malloc(n * sizeof(int));
+    printf("Enter elements: ");
+    for (int i = 0; i < n; i++)
+        scanf("%d", &arr[i]);
+
+
+    clock_t start = clock();
+    quickSort(arr, 0, n - 1);
+    clock_t end = clock();
+
+
+    printf("Sorted array: ");
+    for (int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+
+
+    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("\nTime taken: %f seconds\n", time_taken);
+    free(arr);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 5. Heap Sort
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+
+void heapify(int arr[], int n, int i) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+
+    if (left < n && arr[left] > arr[largest])
+        largest = left;
+
+
+    if (right < n && arr[right] > arr[largest])
+        largest = right;
+
+
+    if (largest != i) {
+        int temp = arr[i];
+        arr[i] = arr[largest];
+        arr[largest] = temp;
+        heapify(arr, n, largest);
+    }
+}
+
+
+void heapSort(int arr[], int n) {
+    for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(arr, n, i);
+
+
+    for (int i = n - 1; i >= 0; i--) {
+        int temp = arr[0];
+        arr[0] = arr[i];
+        arr[i] = temp;
+        heapify(arr, i, 0);
+    }
+}
+
+
+int main5() {
+    int n;
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+    int *arr = (int *)malloc(n * sizeof(int));
+    printf("Enter elements: ");
+    for (int i = 0; i < n; i++)
+        scanf("%d", &arr[i]);
+
+
+    clock_t start = clock();
+    heapSort(arr, n);
+    clock_t end = clock();
+
+
+    printf("Sorted array: ");
+    for (int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+
+
+    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("\nTime taken: %f seconds\n", time_taken);
+    free(arr);
+    return 0;
+}
+
+
+// More programs will be added below...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//fractional knapsack
+
+
+struct Item {
+    int weight;
+    int profit;
+};
+
+
+int compare(const void *a, const void *b) {
+    double r1 = ((double)((struct Item *)a)->profit / ((struct Item *)a)->weight);
+    double r2 = ((double)((struct Item *)b)->profit / ((struct Item *)b)->weight);
+    return (r2 > r1) - (r2 < r1);
+}
+
+
+void fractionalKnapsack(int capacity, struct Item items[], int n) {
+    qsort(items, n, sizeof(struct Item), compare);
+
+
+    double totalProfit = 0.0;
+    int remaining = capacity;
+
+
+    for (int i = 0; i < n; i++) {
+        if (items[i].weight <= remaining) {
+            remaining -= items[i].weight;
+            totalProfit += items[i].profit;
+        } else {
+            totalProfit += items[i].profit * ((double)remaining / items[i].weight);
+            break;
+        }
+    }
+
+
+    printf("Maximum Profit: %.2f\n", totalProfit);
+}
+
+
+int main6() {
+    int n, capacity;
+    printf("Enter number of items: ");
+    scanf("%d", &n);
+    struct Item *items = (struct Item *)malloc(n * sizeof(struct Item));
+
+
+    printf("Enter profits and weights of items:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Profit and Weight of item %d: ", i + 1);
+        scanf("%d %d", &items[i].profit, &items[i].weight);
+    }
+
+
+    printf("Enter capacity of knapsack: ");
+    scanf("%d", &capacity);
+
+
+    fractionalKnapsack(capacity, items, n);
+    free(items);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 8. Floyd Warshall Algorithm
+#include <stdio.h>
+#define INF 99999
+
+
+void floydWarshall(int graph[100][100], int n) {
+    int dist[100][100];
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            dist[i][j] = graph[i][j];
+        }
+    }
+
+
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dist[i][k] + dist[k][j] < dist[i][j])
+                    dist[i][j] = dist[i][k] + dist[k][j];
+            }
+        }
+    }
+
+
+    printf("\nShortest distances between every pair of vertices:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (dist[i][j] == INF)
+                printf("INF ");
+            else
+                printf("%d ", dist[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+
+int main8() {
+    int n;
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+    int graph[100][100];
+
+
+    printf("Enter the adjacency matrix (use 99999 for INF):\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            scanf("%d", &graph[i][j]);
+        }
+    }
+
+
+    floydWarshall(graph, n);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 8. MST using Prim's Algorithm
+#include <stdio.h>
+#include <limits.h>
+
+
+#define V 100
+
+
+int minKey(int key[], int mstSet[], int n) {
+    int min = INT_MAX, min_index;
+
+
+    for (int v = 0; v < n; v++)
+        if (mstSet[v] == 0 && key[v] < min)
+            min = key[v], min_index = v;
+
+
+    return min_index;
+}
+
+
+void printMST(int parent[], int graph[V][V], int n) {
+    printf("Edge \tWeight\n");
+    for (int i = 1; i < n; i++)
+        printf("%d - %d \t%d\n", parent[i], i, graph[i][parent[i]]);
+}
+
+
+void primMST(int graph[V][V], int n) {
+    int parent[V];
+    int key[V];
+    int mstSet[V];
+
+
+    for (int i = 0; i < n; i++)
+        key[i] = INT_MAX, mstSet[i] = 0;
+
+
+    key[0] = 0;
+    parent[0] = -1;
+
+
+    for (int count = 0; count < n - 1; count++) {
+        int u = minKey(key, mstSet, n);
+        mstSet[u] = 1;
+
+
+        for (int v = 0; v < n; v++)
+            if (graph[u][v] && mstSet[v] == 0 && graph[u][v] < key[v])
+                parent[v] = u, key[v] = graph[u][v];
+    }
+
+
+    printMST(parent, graph, n);
+}
+
+
+int main8() {
+    int n, graph[V][V];
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+    printf("Enter adjacency matrix (use 0 for no edge):\n");
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            scanf("%d", &graph[i][j]);
+
+
+    primMST(graph, n);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 9. MST using Kruskal's Algorithm
+#include <stdio.h>
+#include <stdlib.h>
+
+
+#define MAX 100
+
+
+typedef struct {
+    int u, v, w;
+} Edge;
+
+
+int parent[MAX];
+
+
+int find(int i) {
+    while (i != parent[i])
+        i = parent[i];
+    return i;
+}
+
+
+void unionSets(int i, int j) {
+    int a = find(i);
+    int b = find(j);
+    parent[a] = b;
+}
+
+
+int compare(const void *a, const void *b) {
+    Edge *x = (Edge *)a;
+    Edge *y = (Edge *)b;
+    return x->w - y->w;
+}
+
+
+int main9() {
+    int n, e;
+    Edge edges[MAX];
+
+
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+    printf("Enter number of edges: ");
+    scanf("%d", &e);
+
+
+    printf("Enter edges (u v w):\n");
+    for (int i = 0; i < e; i++) {
+        scanf("%d%d%d", &edges[i].u, &edges[i].v, &edges[i].w);
+    }
+
+
+    for (int i = 0; i < n; i++)
+        parent[i] = i;
+
+
+    qsort(edges, e, sizeof(Edge), compare);
+
+
+    printf("Edge \tWeight\n");
+    for (int i = 0, count = 0; count < n - 1 && i < e; i++) {
+        int u = edges[i].u;
+        int v = edges[i].v;
+        int w = edges[i].w;
+        if (find(u) != find(v)) {
+            printf("%d - %d \t%d\n", u, v, w);
+            unionSets(u, v);
+            count++;
+        }
+    }
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//dijkstra
+
+#include <stdio.h>
+#include <limits.h>
+
+
+#define V 100
+
+
+int minDistance(int dist[], int sptSet[], int n) {
+    int min = INT_MAX, min_index;
+    for (int v = 0; v < n; v++)
+        if (!sptSet[v] && dist[v] <= min)
+            min = dist[v], min_index = v;
+    return min_index;
+}
+
+
+void printSolution(int dist[], int n) {
+    printf("Vertex \t Distance from Source\n");
+    for (int i = 0; i < n; i++)
+        printf("%d \t %d\n", i, dist[i]);
+}
+
+
+void dijkstra(int graph[V][V], int src, int n) {
+    int dist[V], sptSet[V];
+    for (int i = 0; i < n; i++)
+        dist[i] = INT_MAX, sptSet[i] = 0;
+
+
+    dist[src] = 0;
+
+
+    for (int count = 0; count < n - 1; count++) {
+        int u = minDistance(dist, sptSet, n);
+        sptSet[u] = 1;
+
+
+        for (int v = 0; v < n; v++)
+            if (!sptSet[v] && graph[u][v] && dist[u] != INT_MAX && dist[u] + graph[u][v] < dist[v])
+                dist[v] = dist[u] + graph[u][v];
+    }
+
+
+    printSolution(dist, n);
+}
+
+
+int main10() {
+    int n, graph[V][V], src;
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+    printf("Enter adjacency matrix (0 if no edge):\n");
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            scanf("%d", &graph[i][j]);
+
+
+    printf("Enter source vertex: ");
+    scanf("%d", &src);
+
+
+    dijkstra(graph, src, n);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 11. N-Queens using Backtracking
+#include <stdio.h>
+#include <stdbool.h>
+#define N 10
+
+
+int board[N][N];
+
+
+bool isSafe(int row, int col, int n) {
+    for (int i = 0; i < col; i++)
+        if (board[row][i]) return false;
+
+
+    for (int i = row, j = col; i >= 0 && j >= 0; i--, j--)
+        if (board[i][j]) return false;
+
+
+    for (int i = row, j = col; i < n && j >= 0; i++, j--)
+        if (board[i][j]) return false;
+
+
+    return true;
+}
+
+
+bool solveNQUtil(int col, int n) {
+    if (col >= n) return true;
+
+
+    for (int i = 0; i < n; i++) {
+        if (isSafe(i, col, n)) {
+            board[i][col] = 1;
+            if (solveNQUtil(col + 1, n)) return true;
+            board[i][col] = 0;
+        }
+    }
+    return false;
+}
+
+
+void printSolution(int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++)
+            printf("%d ", board[i][j]);
+        printf("\n");
+    }
+}
+
+
+int main11() {
+    int n;
+    printf("Enter value of N for N-Queens: ");
+    scanf("%d", &n);
+    if (solveNQUtil(0, n))
+        printSolution(n);
+    else
+        printf("No solution exists for N = %d\n", n);
+    return 0;
+}
